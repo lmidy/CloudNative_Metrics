@@ -13,13 +13,43 @@ Create a dashboard in Grafana that shows Prometheus as a source. Take a screensh
 ![Dashboard](./answer-img/SampleDashboard.png)
 
 ## Describe SLO/SLI
-*TODO:* Describe, in your own words, what the SLIs are, based on an SLO of *monthly uptime* and *request response time*.
+Describe, in your own words, what the SLIs are, based on an SLO of *monthly uptime* and *request response time*.
+
+`monthly uptime` prometheus stores a an `up` metric with the value `1` when the instance of the pod is healthy or `0` when it fails. We could measure this metric over a 30 day period
+
+`request response time` 95% percent of requests responses take less than 5 seconds to complete. 
 
 ## Creating SLI metrics.
 *TODO:* It is important to know why we want to measure certain metrics for our customer. Describe in detail 5 metrics to measure these SLIs. 
 
+####  Uptime: 
+- the total time the application is available to serve requests
+- Example: Site should be up for 99.95% over a 30 day period.
+- Why? Poor uptime percentages could result in financial penalties and could violate any SLAs we have or could cause reputational damage and limit confidence in our digital product offering.
+
+#### Latency:
+- the time it takes to serve a request
+- Example: web requests should be served 99% of time under 500ms
+- Why? We want to ensure that we are able to serve the traffic that goes to our website, both from a frontend and backend perspective and that there are no bottlenecks in any layers of our service
+
+#### Traffic:
+- total number of requests to hit our site across the network during a given time period
+- Example: hourly unique visitors to reach 
+- Why? We want to ensure we have an SLI that measures how much our site is visited and that we can handle demand 
+
+#### Errors:
+- the number of requests that fail
+- Example: 4xx, 5xx errors that appear in our system within a given time period
+- Why? We want to ensure we keep quality of our errors to an acceptable rate. An increase an errors post release could signal proactively an issue with a recent release. High increase in errors could have a negative impact to traffic overtime
+
+#### Saturation:
+- CPU usage or memory usage
+- Example: CPU usage during peak traffic hours
+- Why? The amount of work or strain your infrastructure has to do to support your product. Depending on how the service is performing you require changes to correctly scale or satisfy bursts in traffic. 100% utilization can be a sign of bottleneck that could impact other SLIs such as response times and latency
+
 ## Create a Dashboard to measure our SLIs
 *TODO:* Create a dashboard to measure the uptime of the frontend and backend services We will also want to measure to measure 40x and 50x errors. Create a dashboard that show these values over a 24 hour period and take a screenshot.
+
 
 ## Tracing our Flask App
 *TODO:*  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
