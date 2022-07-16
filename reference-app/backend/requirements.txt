@@ -5,3 +5,13 @@ gunicorn==20.0.4
 pymongo==3.11.0
 Flask-PyMongo==2.3.0
 prometheus-client==0.12.0
+prometheus-flask-exporter
+jaeger-client==4.6.1
+Flask-OpenTracing==1.1.0
+opentelemetry-api
+opentelemetry-exporter-jaeger
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-requests
+opentelemetry-instrumentation
+opentelemetry-sdk
+requests==2.23.0
