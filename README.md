@@ -19,8 +19,8 @@ Describe, in your own words, what the SLIs are, based on an SLO of *monthly upti
 
 `request response time` 95% percent of requests responses take less than 5 seconds to complete. 
 
-## Creating SLI metrics.
-*TODO:* It is important to know why we want to measure certain metrics for our customer. Describe in detail 5 metrics to measure these SLIs. 
+## Creating SLI metrics. 
+It is important to know why we want to measure certain metrics for our customer. Describe in detail 5 metrics to measure these SLIs. 
 
 ####  Uptime: 
 - the total time the application is available to serve requests
@@ -48,8 +48,11 @@ Describe, in your own words, what the SLIs are, based on an SLO of *monthly upti
 - Why? The amount of work or strain your infrastructure has to do to support your product. Depending on how the service is performing you require changes to correctly scale or satisfy bursts in traffic. 100% utilization can be a sign of bottleneck that could impact other SLIs such as response times and latency
 
 ## Create a Dashboard to measure our SLIs
-*TODO:* Create a dashboard to measure the uptime of the frontend and backend services We will also want to measure to measure 40x and 50x errors. Create a dashboard that show these values over a 24 hour period and take a screenshot.
+Create a dashboard to measure the uptime of the frontend and backend services 
+We will also want to measure to measure 40x and 50x errors. 
+Create a dashboard that show these values over a 24 hour period and take a screenshot.
 
+![4xx-5xx-AND-Uptime.png](./answer-img/4xx-5xx-AND-Uptime.png)
 
 ## Tracing our Flask App
 *TODO:*  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
