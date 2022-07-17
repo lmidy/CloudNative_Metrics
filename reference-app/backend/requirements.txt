@@ -14,4 +14,3 @@ opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-requests
 opentelemetry-instrumentation
 opentelemetry-sdk
-requests==2.23.0

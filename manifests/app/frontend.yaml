@@ -24,7 +24,7 @@ spec:
         - env:
             - name: JAEGER_HOST
               value: my-traces-agent.observability.svc.cluster.local
-          image: lynettemidy/frontend:v1.0.0
+          image: lynettemidy/frontend
           imagePullPolicy: Always
           name: frontend
           ports:
