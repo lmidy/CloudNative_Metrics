@@ -1,47 +1,44 @@
 from flask import Flask, render_template, request, jsonify
-from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
-from prometheus_flask_exporter import PrometheusMetrics
-from flask_opentracing import FlaskTracing
-import logging
+from flask_cors import CORS
 import os
+import pymongo
+import logging
+from flask_pymongo import PyMongo
+# Tracing
 from jaeger_client import Config
+from jaeger_client.metrics.prometheus import PrometheusMetricsFactory
+from opentelemetry import trace
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.exporter import jaeger
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from jaeger_client.metrics.prometheus import PrometheusMetricsFactory
-import requests
-import re
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 
-import pymongo
-from flask_pymongo import PyMongo
+# from prometheus_flask_exporter import PrometheusMetrics
+# Since we're using gunicorn - https://github.com/rycus86/prometheus_flask_exporter/blob/master/examples/gunicorn-internal
+from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
+from prometheus_flask_exporter import PrometheusMetrics
 
-app = Flask(__name__)
+# Jaeger Tracing Config
+'''
+trace.set_tracer_provider(TracerProvider(
+    TracerProvider(
+        resource=Resource.create({SERVICE_NAME: "backend"})
+    )
+))
+trace.get_tracer_provider().add_span_processor(
+    BatchSpanProcessor(JaegerExporter())
+    )
+tracer = trace.get_tracer(__name__)
+'''
 
-app.config["MONGO_DBNAME"] = "example-mongodb"
-app.config[
-    "MONGO_URI"
-] = "mongodb://example-mongodb-svc.default.svc.cluster.local:27017/example-mongodb"
-
-metrics = PrometheusMetrics(app)
-
-mongo = PyMongo(app)
-
-metrics.info('app_info', 'Application info', version='1.0.3')
-record_requests_by_status = metrics.summary(
-    'requests_by_status', 'Request latencies by status',
-    labels={'status': lambda: request.status_code()}
-)
-record_page_visits = metrics.counter(
-    'invocation_by_type', 'Number of invocations by type',
-    labels={'item_type': lambda: request.view_args['type']}
-)
-
-FlaskInstrumentor().instrument_app(app)
-RequestsInstrumentor().instrument()
-
-
-def init_tracer():
-    logging.getLogger("").handlers = []
-    logging.basicConfig(format="%(message)s", level=logging.DEBUG)
+# Configure Jaeger tracer
+def init_tracer(service):
+    logging.getLogger('').handlers = []
+    logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
     config = Config(
         config={
@@ -51,87 +48,125 @@ def init_tracer():
             },
             'logging': True,
         },
-        service_name="backend",
-        metrics_factory=PrometheusMetricsFactory(service_name_label="backend"),
+        service_name=service,
+        validate=True
     )
 
     # this call also sets opentracing.tracer
     return config.initialize_tracer()
 
+tracer = init_tracer('backend')
 
-tracer = FlaskTracing(lambda: init_tracer(), True, app)
+# Backend app
+app = Flask(__name__)
+FlaskInstrumentor().instrument_app(app)
+RequestsInstrumentor().instrument()
+CORS(app)
 
-with tracer.tracer.start_span("backend-span") as span:
-    span.set_tag("backend-tag", "100")
+# FlaskInstrumentor().instrument_app(app, excluded_urls="metrics")
+# RequestsInstrumentor().instrument()
 
+metrics = GunicornInternalPrometheusMetrics(app, group_by='endpoint')
+# metrics = PrometheusMetrics(app, group_by='endpoint')
 
-@app.route("/")
+# static information as metric
+metrics.info('backend', 'Backend App Metrics', version='1.0.3')
+
+# register extra metrics
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths', labels={'path': lambda: request.path}
+    )
+)
+
+# custom metric to be applied to multiple endpoints
+endpoint_counter = metrics.counter(
+    'by_endpoint_counter', 'Request count by endpoints',
+    labels={'endpoint': lambda: request.endpoint}
+)
+
+app.config['MONGO_DBNAME'] = 'example-mongodb'
+app.config['MONGO_URI'] = 'mongodb://example-mongodb-svc.default.svc.cluster.local:27017/example-mongodb'
+
+mongo = PyMongo(app)
+
+@app.route('/')
+@endpoint_counter
 def homepage():
-    return "Hello World", 200
+    with tracer.start_active_span('home-page'):
+        answer = "I'm on the home page"
+        return jsonify(response=answer)
 
 
-@app.route("/api")
+@app.route('/api')
+@endpoint_counter
 def my_api():
-    answer = "something"
-    return jsonify(response=answer)
+    with tracer.start_span('my-api'):
+        answer = something # This will create an error
+        return jsonify(response=answer)
 
-
-@app.route("/star", methods=["POST"])
+@app.route('/star', methods=['POST'])
+@endpoint_counter
 def add_star():
-    star = mongo.db.stars
-    name = request.json["name"]
-    distance = request.json["distance"]
-    star_id = star.insert({"name": name, "distance": distance})
-    new_star = star.find_one({"_id": star_id})
-    output = {"name": new_star["name"], "distance": new_star["distance"]}
-    return jsonify({"result": output})
+    with tracer.start_span('add star'):
+        star = mongo.db.stars
+        name = request.json['name']
+        distance = request.json['distance']
+        star_id = star.insert({'name': name, 'distance': distance})
+        new_star = star.find_one({'_id': star_id })
+        output = {'name' : new_star['name'], 'distance' : new_star['distance']}
+        return jsonify({'result' : output})
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv["message"] = self.message
+        return rv
 
 
-@app.route("/trace")
-def trace():
-    def remove_tags(text):
-        tag = re.compile(r"<[^>]+>")
-        return tag.sub("", text)
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
-    with tracer.start_span("get-python-jobs") as span:
-        res = requests.get("https://jobs.github.com/positions.json?description=python")
-        span.log_kv({"event": "get jobs count", "count": len(res.json())})
-        span.set_tag("jobs-count", len(res.json()))
+@app.route("/403")
+def status_code_403():
+    status_code = 403
+    raise InvalidUsage(
+        "Raising status code: {}".format(status_code), status_code=status_code
+    )
 
-        jobs_info = []
-        for result in res.json():
-            jobs = {}
-            with tracer.start_span("request-site") as site_span:
-                try:
-                    jobs["description"] = remove_tags(result["description"])
-                    jobs["company"] = result["company"]
-                    jobs["company_url"] = result["company_url"]
-                    jobs["created_at"] = result["created_at"]
-                    jobs["how_to_apply"] = result["how_to_apply"]
-                    jobs["location"] = result["location"]
-                    jobs["title"] = result["title"]
-                    jobs["type"] = result["type"]
-                    jobs["url"] = result["url"]
+@app.route("/404")
+def status_code_404():
+    status_code = 404
+    raise InvalidUsage(
+        "Raising status code: {}".format(status_code), status_code=status_code
+    )
 
-                    jobs_info.append(jobs)
-                    site_span.set_tag("http.status_code", res.status_code)
-                    site_span.set_tag("company-site", result["company"])
-                except Exception:
-                    site_span.set_tag("http.status_code", res.status_code)
-                    site_span.set_tag("company-site", result["company"])
+@app.route("/500")
+def status_code_500():
+    status_code = 500
+    raise InvalidUsage(
+        "Raising status code: {}".format(status_code), status_code=status_code
+    )
 
-    return jsonify(jobs_info)
+@app.route("/503")
+def status_code_503():
+    status_code = 503
+    raise InvalidUsage(
+        "Raising status code: {}".format(status_code), status_code=status_code)
 
-
-@app.route("/error-400")
-def create_400error():
-    return "we created an error", 400
-
-
-@app.route("/error")
-def create_500error():
-    return "we created an error", 500
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run()
