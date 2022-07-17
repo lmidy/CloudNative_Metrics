@@ -6,12 +6,12 @@ metadata:
     prometheus.io/scrape: "true"
     prometheus.io/path: /metrics
     prometheus.io/port: trialport
+  name: trial
   labels:
     name: trial
     release: prometheus
-  name: trial
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: trial
@@ -28,7 +28,7 @@ spec:
           imagePullPolicy: Always
           name: trial
           ports:
-            - name: trialport
+            - name: trailport
               containerPort: 8080
               protocol: TCP
 ---

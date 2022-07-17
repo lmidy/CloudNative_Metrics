@@ -88,6 +88,19 @@ def trace():
 
     return jsonify(jobs_info)
 
+@app.route("/error-400")
+@metrics.summary('requests_by_status_4xx', 'Status Code', labels={
+    'code': lambda r: '400'
+})
+def create_400error():
+    return "we created an error", 400
+
+@app.route("/error")
+@metrics.summary('requests_by_status_5xx', 'Status Code', labels={
+    'code': lambda r: '500'
+})
+def create_500error():
+    return "we created an error", 500
 
 if __name__ == "__main__":
     app.run(debug=True,)

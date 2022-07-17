@@ -6,10 +6,10 @@ metadata:
     prometheus.io/scrape: "true"
     prometheus.io/path: /metrics
     prometheus.io/port: backendport
+  name: backend
   labels:
     name: backend
     release: prometheus
-  name: backend
 spec:
   replicas: 3
   selector:
