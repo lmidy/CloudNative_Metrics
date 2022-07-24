@@ -29,7 +29,7 @@ spec:
           name: backend
           ports:
             - name: backendport
-              containerPort: 8080
+              containerPort: 8081
               protocol: TCP
 ---
 apiVersion: v1
