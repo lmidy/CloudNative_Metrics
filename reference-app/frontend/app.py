@@ -1,3 +1,5 @@
+import os
+import requests
 from flask import Flask, render_template, request
 from prometheus_flask_exporter import PrometheusMetrics
 
@@ -14,6 +16,26 @@ record_page_visits = metrics.counter(
     'invocation_by_type', 'Number of invocations by type',
     labels={'item_type': lambda: request.view_args['type']}
 )
+
+
+def get_counter(counter_endpoint):
+    counter_response = requests.get(counter_endpoint)
+    return counter_response.text
+
+
+def increase_counter(counter_endpoint):
+    counter_response = requests.post(counter_endpoint)
+    return counter_response.text
+
+
+@app.route("/visit")
+def visit():
+    counter_service = os.environ.get('COUNTER_ENDPOINT', default="http://localhost:8081")
+    counter_endpoint = f'{counter_service}/api/counter'
+    counter = get_counter(counter_endpoint)
+    increase_counter(counter_endpoint)
+
+    return f" You're visitor number {counter} in here! \n\n"
 
 
 @app.route("/")

@@ -11,7 +11,7 @@ metadata:
     name: backend
     release: prometheus
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -24,7 +24,7 @@ spec:
         - env:
             - name: JAEGER_HOST
               value: my-traces-agent.observability.svc.cluster.local
-          image: lynettemidy/backend
+          image: lynettemidy/backend:v1
           imagePullPolicy: Always
           name: backend
           ports:
@@ -51,6 +51,11 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  annotations:
+    sidecar.jaegertracing.io/inject: 'true'
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: backend
   name: backend
   namespace: monitoring
   labels:

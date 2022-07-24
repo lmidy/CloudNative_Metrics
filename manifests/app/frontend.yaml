@@ -5,7 +5,7 @@ metadata:
     sidecar.jaegertracing.io/inject: 'true'
     prometheus.io/scrape: "true"
     prometheus.io/path: /metrics
-    prometheus.io/port: frontendport
+    prometheus.io/port: frontend
   name: frontend
   labels:
     name: frontend
@@ -21,14 +21,16 @@ spec:
         app: frontend
     spec:
       containers:
-        - env:
-            - name: JAEGER_HOST
-              value: my-traces-agent.observability.svc.cluster.local
-          image: lynettemidy/frontend
+        - name: frontend
+          image: lynettemidy/frontend:v1
           imagePullPolicy: Always
-          name: frontend
+          env:
+            - name: COUNTER_ENDPOINT
+              value: "http://do-visit-counter-backend.default.svc.cluster.local:8081"
+            - name: JAEGER_HOST
+              value: "my-traces-agent.observability.svc.cluster.local"
           ports:
-            - name: frontendport
+            - name: frontend
               containerPort: 8080
               protocol: TCP
 ---
@@ -45,12 +47,17 @@ spec:
     - name: frontend
       protocol: TCP
       port: 8080
-      targetPort: frontendport
+      targetPort: frontend
   type: LoadBalancer
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  annotations:
+    sidecar.jaegertracing.io/inject: 'true'
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: frontend
   name: frontend
   namespace: monitoring
   labels:
