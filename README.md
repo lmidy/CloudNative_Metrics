@@ -1,3 +1,7 @@
+# Cloud Native Metrics
+##Overview
+
+
 **Note:** For the screenshots, you can store all of your answer images in the `answer-img` directory.
 
 ## Verify the monitoring installation
@@ -87,4 +91,21 @@ Description:
 ## Final Dashboard
 *TODO*: Create a Dashboard containing graphs that capture all the metrics of your KPIs and adequately representing your SLIs and SLOs. Include a screenshot of the dashboard here, and write a text description of what graphs are represented in the dashboard.  
 
+##Project Background
+### Technologies
+* [Vagrant](https://www.vagrantup.com/) - Tool for managing virtual deployed environments
+* [VirtualBox](https://www.virtualbox.org/) - Hypervisor allowing you to run multiple operating systems
+* [K3s](https://k3s.io/) - Lightweight distribution of K8s to easily develop against a local cluster
+* [Jaeger](https://github.com/jaegertracing/jaeger-operator/) - Jaeger Operator
+
+###Prerequisites
+We will be installing the tools that we'll need to use for getting our environment set up properly.
+1. [Install Docker](https://docs.docker.com/get-docker/)
+2. [Set up a DockerHub account](https://hub.docker.com/)
+3. [Set up `kubectl`](https://rancher.com/docs/rancher/v2.x/en/cluster-admin/cluster-access/kubectl/)
+4. [Install VirtualBox](https://www.virtualbox.org/wiki/Downloads) with at least version 6.0
+5. [Install Vagrant](https://www.vagrantup.com/docs/installation) with at least version 2.0
+
+##Steps
+1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
 
