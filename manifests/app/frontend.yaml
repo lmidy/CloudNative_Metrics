@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: lynettemidy/frontend:v1
+          image: lynettemidy/frontend:v2
           imagePullPolicy: Always
           env:
             - name: COUNTER_ENDPOINT

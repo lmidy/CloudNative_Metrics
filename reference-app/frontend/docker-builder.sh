@@ -1,2 +1,2 @@
-docker build -t lynettemidy/frontend:v1 .
-docker push lynettemidy/frontend:v1
+docker build -t lynettemidy/frontend:v2 .
+docker push lynettemidy/frontend:v2

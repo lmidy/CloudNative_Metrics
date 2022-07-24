@@ -18,26 +18,6 @@ record_page_visits = metrics.counter(
 )
 
 
-def get_counter(counter_endpoint):
-    counter_response = requests.get(counter_endpoint)
-    return counter_response.text
-
-
-def increase_counter(counter_endpoint):
-    counter_response = requests.post(counter_endpoint)
-    return counter_response.text
-
-
-@app.route("/visit")
-def visit():
-    counter_service = os.environ.get('COUNTER_ENDPOINT', default="http://localhost:8081")
-    counter_endpoint = f'{counter_service}/api/counter'
-    counter = get_counter(counter_endpoint)
-    increase_counter(counter_endpoint)
-
-    return f" You're visitor number {counter} in here! \n\n"
-
-
 @app.route("/")
 def homepage():
     return render_template("main.html")
@@ -45,12 +25,12 @@ def homepage():
 
 @app.route("/error-400")
 def create_400error():
-    return "we created an error", 400
+    return "Front End 400 error ", 400
 
 
 @app.route("/error")
 def create_500error():
-    return "we created an error", 500
+    return "Backend 500 Error", 500
 
 
 if __name__ == "__main__":
