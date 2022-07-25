@@ -1,6 +1,6 @@
 # Cloud Native Metrics
-##Overview
-
+## Overview
+In this project, you will create dashboards that use multiple graphs to monitor our sample application that is deployed on a Kubernetes cluster. You will be using Prometheus, Jaeger, and Grafana in order to monitor, trace and visualize your experience.
 
 **Note:** For the screenshots, you can store all of your answer images in the `answer-img` directory.
 
@@ -59,13 +59,19 @@ Create a dashboard that show these values over a 24 hour period and take a scree
 ![6-4xx-and-uptime-dashboard.png](./answer-img/6-4xx-and-uptime-dashboard.png)
 
 ## Tracing our Flask App
-*TODO:*  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
+ We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
+ ![backendtrace.png](./answer-img/backendtrace.png)
+ ![backendcode.png](./answer-img/backendcode.png)
 
 ## Jaeger in Dashboards
-*TODO:* Now that the trace is running, let's add the metric to our current Grafana dashboard. Once this is completed, provide a screenshot of it here.
+*TODO:* Now that the trace is running, let's add the metric to our current Grafana dashboard. 
+Once this is completed, provide a screenshot of it here.
 
 ## Report Error
-*TODO:* Using the template below, write a trouble ticket for the developers, to explain the errors that you are seeing (400, 500, latency) and to let them know the file that is causing the issue also include a screenshot of the tracer span to demonstrate how we can user a tracer to locate errors easily.
+*TODO:* Using the template below, write a trouble ticket for the developers, 
+to explain the errors that you are seeing (400, 500, latency) and to let them 
+know the file that is causing the issue also include a screenshot of the tracer span to 
+demonstrate how we can user a tracer to locate errors easily.
 
 TROUBLE TICKET
 
@@ -83,13 +89,17 @@ Description:
 
 
 ## Creating SLIs and SLOs
-*TODO:* We want to create an SLO guaranteeing that our application has a 99.95% uptime per month. Name four SLIs that you would use to measure the success of this SLO.
+*TODO:* We want to create an SLO guaranteeing that our application has a 99.95% uptime per month. 
+Name four SLIs that you would use to measure the success of this SLO.
 
 ## Building KPIs for our plan
-*TODO*: Now that we have our SLIs and SLOs, create a list of 2-3 KPIs to accurately measure these metrics as well as a description of why those KPIs were chosen. We will make a dashboard for this, but first write them down here.
+*TODO*: Now that we have our SLIs and SLOs, create a list of 2-3 KPIs to accurately measure these metrics 
+as well as a description of why those KPIs were chosen. We will make a dashboard for this, but first write them down here.
 
 ## Final Dashboard
-*TODO*: Create a Dashboard containing graphs that capture all the metrics of your KPIs and adequately representing your SLIs and SLOs. Include a screenshot of the dashboard here, and write a text description of what graphs are represented in the dashboard.  
+*TODO*: Create a Dashboard containing graphs that capture all the metrics of your KPIs 
+and adequately representing your SLIs and SLOs. Include a screenshot of the dashboard here,
+and write a text description of what graphs are represented in the dashboard.  
 
 ##Project Background
 ### Technologies
@@ -97,6 +107,8 @@ Description:
 * [VirtualBox](https://www.virtualbox.org/) - Hypervisor allowing you to run multiple operating systems
 * [K3s](https://k3s.io/) - Lightweight distribution of K8s to easily develop against a local cluster
 * [Jaeger](https://github.com/jaegertracing/jaeger-operator/) - Jaeger Operator
+* [Prometheus](https://prometheus.io/) - Prometheus
+* [Grafana](https://grafana.com/) - Grafana
 
 ###Prerequisites
 We will be installing the tools that we'll need to use for getting our environment set up properly.
@@ -107,5 +119,30 @@ We will be installing the tools that we'll need to use for getting our environme
 5. [Install Vagrant](https://www.vagrantup.com/docs/installation) with at least version 2.0
 
 ##Steps
-1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
-
+1. Install Helm and use it to install Prometheus and Grafana
+   [helm-installation](https://helm.sh/docs/intro/install/#from-script)
+2. Install Jaeger
+   `kubectl create namespace observability`
+   `kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/crds/jaegertracing.io_jaegers_crd.yaml`
+   `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/service_account.yaml`
+   `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/role.yaml`
+   `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/role_binding.yaml`
+   `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/operator.yaml`
+3. Grant Jaeger cluster wide visibility
+   `kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/cluster_role.yaml`
+   `kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/cluster_role_binding.yaml`
+4. Install the Python application, navigate to manifests/app
+   `kubectl apply -f backend.yaml`
+   `kubectl apply -f frontend.yaml`
+5. Expose Grafana
+   `kubectl get pod -n monitoring | grep grafana`copy the `prometheus-grafana-######`
+   `kubectl port-forward -n monitoring prometheus-grafana-7b574fc5b9-89ltk  3000`
+    [frontend](http://localhost:3000), login with username:admin, password: prom-operator
+6. Expose Python Application, Frontend and Backend
+   `kubectl port-forward svc/frontend 8080:8080`
+   `kubectl port-forward svc/backend 8081:8081` (make sure the ports match what is in your vagrant file and in your yaml deployment)
+    [backend](http://localhost:8080)
+   `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081; done`
+7. Checkout prometheus if you want
+    `kubectl port-forward -n monitoring service/prometheus-kube-prometheus-prometheus 9090:9090`
+   
