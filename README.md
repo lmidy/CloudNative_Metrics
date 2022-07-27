@@ -64,8 +64,9 @@ Create a dashboard that show these values over a 24 hour period and take a scree
  ![backendcode.png](./answer-img/backendcode.png)
 
 ## Jaeger in Dashboards
-*TODO:* Now that the trace is running, let's add the metric to our current Grafana dashboard. 
+ Now that the trace is running, let's add the metric to our current Grafana dashboard. 
 Once this is completed, provide a screenshot of it here.
+ ![BEspansDuration.png](./answer-img/BEspansDuration.png)
 
 ## Report Error
 *TODO:* Using the template below, write a trouble ticket for the developers, 

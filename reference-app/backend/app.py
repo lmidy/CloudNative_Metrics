@@ -35,7 +35,7 @@ def init_tracer(backend):
 
 
 # starter code
-tracer = init_tracer("test-service")
+tracer = init_tracer("backend_service")
 
 with tracer.start_span("first-span") as span:
     span.set_tag("first-tag", "100")
@@ -54,17 +54,24 @@ record_page_visits = metrics.counter(
 
 @app.route("/")
 def homepage():
-    return "Hello World"
+    message = "Hello Gorgeous"
+    with tracer.start_span("home_route") as span:
+        span.set_tag("message", message)
+    return message
 
 
 @app.route("/api")
 def my_api():
-    answer = "something"
+    answer = "something in this backend api"
+    with tracer.start_span("api") as span:
+        span.set_tag("api_route_span", answer)
     return jsonify(response=answer)
 
 
 @app.route("/star", methods=["POST"])
 def add_star():
+    with tracer.start_span("add_star_api") as span:
+        span.set_tag("post_star_span", "star posted")
     star = mongo.db.stars
     name = request.json["name"]
     distance = request.json["distance"]
