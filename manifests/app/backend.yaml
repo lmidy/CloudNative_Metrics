@@ -23,8 +23,8 @@ spec:
       containers:
         - env:
             - name: JAEGER_HOST
-              value: my-traces-agent.observability.svc.cluster.local
-          image: lynettemidy/backend:v2.1
+              value: "simplest-query.observability.svc.cluster.local"
+          image: lynettemidy/backend:v2.2
           imagePullPolicy: Always
           name: backend
           ports:

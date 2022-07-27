@@ -55,23 +55,23 @@ record_page_visits = metrics.counter(
 @app.route("/")
 def homepage():
     message = "Hello Gorgeous"
-    with tracer.start_span("home_route") as span:
-        span.set_tag("message", message)
+    with tracer.start_span("home_route") as span2:
+        span2.set_tag("message", message)
     return message
 
 
 @app.route("/api")
 def my_api():
     answer = "something in this backend api"
-    with tracer.start_span("api") as span:
-        span.set_tag("api_route_span", answer)
+    with tracer.start_span("api") as span3:
+        span3.set_tag("api_route_span", answer)
     return jsonify(response=answer)
 
 
 @app.route("/star", methods=["POST"])
 def add_star():
-    with tracer.start_span("add_star_api") as span:
-        span.set_tag("post_star_span", "star posted")
+    with tracer.start_span("add_star_api") as span4:
+        span4.set_tag("post_star_span", "star posted")
     star = mongo.db.stars
     name = request.json["name"]
     distance = request.json["distance"]
