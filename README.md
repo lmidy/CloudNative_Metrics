@@ -138,11 +138,13 @@ We will be installing the tools that we'll need to use for getting our environme
 5. Expose Grafana
    `kubectl get pod -n monitoring | grep grafana`copy the `prometheus-grafana-######`
    `kubectl port-forward -n monitoring prometheus-grafana-7b574fc5b9-89ltk  3000`
-    [frontend](http://localhost:3000), login with username:admin, password: prom-operator
+    [grafana](http://localhost:3000), login with username:admin, password: prom-operator
 6. Expose Python Application, Frontend and Backend
    `kubectl port-forward svc/frontend 8080:8080`
    `kubectl port-forward svc/backend 8081:8081` (make sure the ports match what is in your vagrant file and in your yaml deployment)
-    [backend](http://localhost:8080)
+    [frontend](http://localhost:8080)
+    [backend](http://localhost:8081)
+
    `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081; done`
 7. Checkout prometheus if you want
     `kubectl port-forward -n monitoring service/prometheus-kube-prometheus-prometheus 9090:9090`

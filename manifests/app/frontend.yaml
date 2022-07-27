@@ -25,10 +25,8 @@ spec:
           image: lynettemidy/frontend:v2
           imagePullPolicy: Always
           env:
-            - name: COUNTER_ENDPOINT
-              value: "http://do-visit-counter-backend.default.svc.cluster.local:8081"
             - name: JAEGER_HOST
-              value: "my-traces-agent.observability.svc.cluster.local"
+              value: "simplest-query.observability.svc.cluster.local"
           ports:
             - name: frontend
               containerPort: 8080
