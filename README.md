@@ -120,7 +120,7 @@ and adequately representing your SLIs and SLOs. Include a screenshot of the dash
 and write a text description of what graphs are represented in the dashboard.  
 ![KPIDashboard.jpg](./answer-img/KPIDashboard.png)
 
-##Project Background
+## Project Background
 ### Technologies
 * [Vagrant](https://www.vagrantup.com/) - Tool for managing virtual deployed environments
 * [VirtualBox](https://www.virtualbox.org/) - Hypervisor allowing you to run multiple operating systems
@@ -129,7 +129,7 @@ and write a text description of what graphs are represented in the dashboard.
 * [Prometheus](https://prometheus.io/) - Prometheus
 * [Grafana](https://grafana.com/) - Grafana
 
-###Prerequisites
+### Prerequisites
 We will be installing the tools that we'll need to use for getting our environment set up properly.
 1. [Install Docker](https://docs.docker.com/get-docker/)
 2. [Set up a DockerHub account](https://hub.docker.com/)
@@ -137,7 +137,7 @@ We will be installing the tools that we'll need to use for getting our environme
 4. [Install VirtualBox](https://www.virtualbox.org/wiki/Downloads) with at least version 6.0
 5. [Install Vagrant](https://www.vagrantup.com/docs/installation) with at least version 2.0
 
-##Steps
+## Steps
 1. Install Helm and use it to install Prometheus and Grafana
    [helm-installation](https://helm.sh/docs/intro/install/#from-script)
 2. Install Jaeger
