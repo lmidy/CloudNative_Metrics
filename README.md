@@ -26,30 +26,31 @@ Describe, in your own words, what the SLIs are, based on an SLO of *monthly upti
 ## Creating SLI metrics. 
 It is important to know why we want to measure certain metrics for our customer. Describe in detail 5 metrics to measure these SLIs. 
 
-####  Uptime: 
-- the total time the application is available to serve requests
-- Example: Site should be up for 99.95% over a 30 day period.
+###  Uptime
+- #### SLI: Uptime: the total time the application is available to serve requests
+- #### SLI: Site should be up for 99.95% over a 7 day period.
 - Why? Poor uptime percentages could result in financial penalties and could violate any SLAs we have or could cause reputational damage and limit confidence in our digital product offering.
 
-#### Latency:
-- the time it takes to serve a request
-- Example: web requests should be served 99% of time under 500ms
+###  Latency
+- #### SLI: Latency: the time it takes to serve a request
+- #### SLO: HTTP requests should be served 99% of time under 100ms
 - Why? We want to ensure that we are able to serve the traffic that goes to our website, both from a frontend and backend perspective and that there are no bottlenecks in any layers of our service
 
-#### Traffic:
-- total number of requests to hit our site across the network during a given time period
-- Example: hourly unique visitors to reach 
+###  Throughput
+- #### SLI: Throughput: total number of successful requests to hit our site across the network during a given time period
+- #### SLO: HTTP 2xx requests per hour 
 - Why? We want to ensure we have an SLI that measures how much our site is visited and that we can handle demand 
 
-#### Errors:
-- the number of requests that fail
-- Example: 4xx, 5xx errors that appear in our system within a given time period
-- Why? We want to ensure we keep quality of our errors to an acceptable rate. An increase an errors post release could signal proactively an issue with a recent release. High increase in errors could have a negative impact to traffic overtime
+###  Errors 
+- #### SLI: Errors: the number of requests that fail
+- #### SLO: 4xx, 5xx errors that appear in our system within a given hour
+- Why? We want to ensure we keep quality of our errors to an acceptable rate. An increase an errors post release could signal proactively an issue with a recent release. High increase in errors could have a negative impact to traffic/throughput overtime
 
-#### Saturation:
-- CPU usage or memory usage
-- Example: CPU usage during peak traffic hours
-- Why? The amount of work or strain your infrastructure has to do to support your product. Depending on how the service is performing you require changes to correctly scale or satisfy bursts in traffic. 100% utilization can be a sign of bottleneck that could impact other SLIs such as response times and latency
+###  Saturation
+- #### SLI: Saturation: CPU usage or memory usage are in healthy levels
+- #### SLO: Memory usage is below 200 MiB
+- Why? The amount of work or strain your infrastructure has to do to support your product. Depending on how the service is performing you require changes to correctly scale or satisfy bursts in traffic. 100% utilization can be a sign of 
+- bottleneck that could impact other SLIs such as response times and latency
 
 ## Create a Dashboard to measure our SLIs
 Create a dashboard to measure the uptime of the frontend and backend services 
@@ -58,7 +59,7 @@ Create a dashboard that show these values over a 24 hour period and take a scree
 
 ![6-4xx-and-uptime-dashboard.png](./answer-img/6-4xx-and-uptime-dashboard.png)
 
-## Tracing our Flask App
+## Tracing our Flask App - INCLUDES EXTRA CREDIT
  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
  ![backendtrace.png](./answer-img/backendtrace.png)
  ![backendcode.png](./answer-img/backendcode.png)
@@ -82,7 +83,7 @@ Date: Tuesday
 
 Subject: BE Service Degradation S1 Incident
 
-Affected Area: BE Service
+Affected Area: backend/app.py 
 
 Severity: Critical
 
@@ -96,10 +97,13 @@ Please investigate root cause
  We want to create an SLO guaranteeing that our application has a 99.95% uptime per month. 
 Name four SLIs that you would use to measure the success of this SLO.
 
-1. Http 4xx, 5xx errors
-2. Backend CPU usage
-3. Backend Memory usage
-4. Backend Latency with threshold below 50ms
+| Category | SLI |                  SLO                  |
+| ------------- |:-------------:|:-------------------------------------:|
+| Throughput | Average Response time for all successful requests    | Average Response Time is under 100 ms |
+| Availability | Percentage of successful requests    |                  99%                  |
+| Error Rate      | % of Requests with errors per minute    |   Error Rate per hour is under 20%    |
+| Saturation     | CPU usage or memory usage are in healthy levels     |     Memory usage is below 200 MiB     |
+
 
 ## Building KPIs for our plan
  Now that we have our SLIs and SLOs, create a list of 2-3 KPIs to accurately measure these metrics 
@@ -114,6 +118,7 @@ as well as a description of why those KPIs were chosen. We will make a dashboard
  Create a Dashboard containing graphs that capture all the metrics of your KPIs 
 and adequately representing your SLIs and SLOs. Include a screenshot of the dashboard here,
 and write a text description of what graphs are represented in the dashboard.  
+![KPIDashboard.jpg](./answer-img/KPIDashboard.png)
 
 ##Project Background
 ### Technologies
@@ -161,6 +166,12 @@ We will be installing the tools that we'll need to use for getting our environme
     [backend](http://localhost:8081)
 
   * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081; done`
+  * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081/error-400; done`
+  * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081/error; done`
+  * `curl -X POST -H "Content-Type: application/json" \
+     -d '{"name": "linuxize", "distance": "23"}' \
+     http://localhost:8081/star`
+
 8. Checkout prometheus if you want
    * `kubectl port-forward -n monitoring service/prometheus-kube-prometheus-prometheus 9090:9090`
    

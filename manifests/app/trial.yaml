@@ -23,13 +23,13 @@ spec:
       containers:
         - env:
             - name: JAEGER_HOST
-              value: my-traces-agent.observability.svc.cluster.local
-          image: lynettemidy/trial
+              value: "simplest-query.observability.svc.cluster.local"
+          image: lynettemidy/trial:v1.0
           imagePullPolicy: Always
           name: trial
           ports:
             - name: trailport
-              containerPort: 8080
+              containerPort: 8082
               protocol: TCP
 ---
 apiVersion: v1
@@ -51,6 +51,11 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  annotations:
+    sidecar.jaegertracing.io/inject: 'true'
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: trial
   name: trial
   namespace: monitoring
   labels:

@@ -2,7 +2,6 @@ import logging
 import re
 import requests
 
-
 from flask import Flask, jsonify, render_template
 from flask_opentracing import FlaskTracing
 from jaeger_client import Config
@@ -10,7 +9,6 @@ from jaeger_client.metrics.prometheus import PrometheusMetricsFactory
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from prometheus_flask_exporter import PrometheusMetrics
-
 
 app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
@@ -25,17 +23,16 @@ logging.basicConfig(format="%(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def init_tracer(service):
-
+def init_tracer(trail_service):
     config = Config(
         config={
             "sampler": {"type": "const", "param": 1},
             "logging": True,
             "reporter_batch_size": 1,
         },
-        service_name=service,
+        service_name=trail_service,
         validate=True,
-        metrics_factory=PrometheusMetricsFactory(service_name_label=service),
+        metrics_factory=PrometheusMetricsFactory(service_name_label=trail_service),
     )
 
     # this call also sets opentracing.tracer
@@ -82,18 +79,20 @@ def trace():
                     site_span.set_tag("http.status_code", res.status_code)
                     site_span.set_tag("company-site", result["company"])
                 except Exception:
-                    logger.error(f"Unable to get site for {result['company']}")
+                    logger.error("Unable to get site for {result['company']}")
                     site_span.set_tag("http.status_code", res.status_code)
                     site_span.set_tag("company-site", result["company"])
 
     return jsonify(jobs_info)
+
 
 @app.route("/error-400")
 @metrics.summary('requests_by_status_4xx', 'Status Code', labels={
     'code': lambda r: '400'
 })
 def create_400error():
-    return "we created an error", 400
+    return "we created a 400 error", 400
+
 
 @app.route("/error")
 @metrics.summary('requests_by_status_5xx', 'Status Code', labels={
@@ -102,5 +101,6 @@ def create_400error():
 def create_500error():
     return "we created an error", 500
 
+
 if __name__ == "__main__":
-    app.run(debug=True,)
+    app.run(debug=True, )
