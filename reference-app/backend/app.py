@@ -57,6 +57,7 @@ def homepage():
     message = "Hello Gorgeous"
     with tracer.start_span("home_route") as span2:
         span2.set_tag("message", message)
+        span2.log_kv({'event': 'test message', 'life': 42})
     return message
 
 
@@ -65,6 +66,7 @@ def my_api():
     answer = "something in this backend api"
     with tracer.start_span("api") as span3:
         span3.set_tag("api_route_span", answer)
+        span3.log_kv({'event': 'in /api route'})
     return jsonify(response=answer)
 
 
@@ -72,17 +74,26 @@ def my_api():
 def add_star():
     with tracer.start_span("add_star_api") as span4:
         span4.set_tag("post_star_span", "star posted")
-    star = mongo.db.stars
-    name = request.json["name"]
-    distance = request.json["distance"]
-    star_id = star.insert({"name": name, "distance": distance})
-    new_star = star.find_one({"_id": star_id})
-    output = {"name": new_star["name"], "distance": new_star["distance"]}
-    return jsonify({"result": output})
+        span4.log_kv({'event': 'in add star route'})
+        try:
+            name = request.json["name"]
+            distance = request.json["distance"]
+            new_star = request.json["name+****"]
+            new_distance = len(distance)
+            output = {"name": new_star, "distance": new_distance}
+            span4.set_tag("http.status_code", output.status_code)
+            span4.set_tag("try failed", "output")
+        except Exception:
+            span4.set_tag("http.status_code", output.status_code)
+            span4.set_tag("try exception", "output")
+    return jsonify(output)
 
 
 @app.route("/error-400")
 def create_400error():
+    with tracer.start_span("error_400") as span5:
+        span5.set_tag("error", "400 error encountered")
+        span5.log_kv({'event': 'in error route'})
     return "we created a 400 error", 400
 
 

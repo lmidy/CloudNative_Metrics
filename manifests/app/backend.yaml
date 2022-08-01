@@ -24,7 +24,7 @@ spec:
         - env:
             - name: JAEGER_HOST
               value: "simplest-query.observability.svc.cluster.local"
-          image: lynettemidy/backend:v2.2
+          image: lynettemidy/backend:v2.5
           imagePullPolicy: Always
           name: backend
           ports:
