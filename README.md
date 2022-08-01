@@ -97,12 +97,12 @@ Please investigate root cause
  We want to create an SLO guaranteeing that our application has a 99.95% uptime per month. 
 Name four SLIs that you would use to measure the success of this SLO.
 
-| Category | SLI |                  SLO                  |
-| ------------- |:-------------:|:-------------------------------------:|
-| Throughput | Average Response time for all successful requests    | Average Response Time is under 100 ms |
-| Availability | Percentage of successful requests    |                  99%                  |
-| Error Rate      | % of Requests with errors per minute    |   Error Rate per hour is under 20%    |
-| Saturation     | CPU usage or memory usage are in healthy levels     |     Memory usage is below 200 MiB     |
+| Category     |                        SLI                        |                 SLO                  |
+|--------------|:-------------------------------------------------:|:------------------------------------:|
+| Throughput   | Average Response time for all successful requests | Average Response Time is under 2.5ms |
+| Availability |         Percentage of successful requests         |                 99%                  |
+| Error Rate   |       % of Requests with errors per minute        |   Error Rate per hour is under 20%   |
+| Saturation   |  CPU usage or memory usage are in healthy levels  |    Memory usage is below 200 MiB     |
 
 
 ## Building KPIs for our plan
@@ -149,17 +149,21 @@ We will be installing the tools that we'll need to use for getting our environme
    * `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/role.yaml`
    * `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/role_binding.yaml`
    * `kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/operator.yaml`
-4. Grant Jaeger cluster wide visibility
+
+3. Grant Jaeger cluster wide visibility
    * `kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/cluster_role.yaml`
    * `kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/${jaeger_version}/deploy/cluster_role_binding.yaml`
-5. Install the Python application, navigate to manifests/app
+
+4. Install the Python application, navigate to manifests/app
    *`kubectl apply -f backend.yaml`
    *`kubectl apply -f frontend.yaml`
-6. Expose Grafana
+
+5. Expose Grafana
    *`kubectl get pod -n monitoring | grep grafana`copy the `prometheus-grafana-######`
    *`kubectl port-forward -n monitoring prometheus-grafana-7b574fc5b9-89ltk  3000`
     [grafana](http://localhost:3000), login with username:admin, password: prom-operator
-7. Expose Python Application, Frontend and Backend
+
+6. Expose Python Application, Frontend and Backend
    *`kubectl port-forward svc/frontend 8080:8080`
    *`kubectl port-forward svc/backend 8081:8081` (make sure the ports match what is in your vagrant file and in your yaml deployment)
     [frontend](http://localhost:8080)
@@ -168,9 +172,10 @@ We will be installing the tools that we'll need to use for getting our environme
   * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081; done`
   * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081/error-400; done`
   * `for i in 0 1 2 3 4 5 6 7 8 9; do curl localhost:8081/error; done`
-  * `curl -X POST -H "Content-Type: application/json" \
-     -d '{"name": "linuxize", "distance": "23"}' \
-     http://localhost:8081/star`
+  * `curl -X POST -H "Content-Type: application/json" -d '{"name": "linuxize", "distance": "23"}' localhost:8081/star`
+
+7. Expose grafana
+   * `kubectl kubectl port-forward -n monitoring prometheus-grafana-7b574fc5b9-89ltk 3000`
 
 8. Checkout prometheus if you want
    * `kubectl port-forward -n monitoring service/prometheus-kube-prometheus-prometheus 9090:9090`
