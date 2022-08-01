@@ -61,8 +61,9 @@ Create a dashboard that show these values over a 24 hour period and take a scree
 
 ## Tracing our Flask App - INCLUDES EXTRA CREDIT
  We will create a Jaeger span to measure the processes on the backend. Once you fill in the span, provide a screenshot of it here. Also provide a (screenshot) sample Python file containing a trace and span code used to perform Jaeger traces on the backend service.
- ![backendtrace.png](./answer-img/backendtrace.png)
+ ![backendspans.png](./answer-img/backendspans.png)
  ![backendcode.png](./answer-img/backendcode.png)
+
 
 ## Jaeger in Dashboards
  Now that the trace is running, let's add the metric to our current Grafana dashboard. 
@@ -77,20 +78,19 @@ demonstrate how we can user a tracer to locate errors easily.
 
 TROUBLE TICKET
 
-Name: BE service experience significant latency 
+Name: Error on `backend/app.ppy`
 
-Date: Tuesday 
+Date: Sunday July 31, 2022 19:25
 
-Subject: BE Service Degradation S1 Incident
+Subject: Add Star API Error
 
-Affected Area: backend/app.py 
+Affected Area: `backend/app.py, line 88, in add star`
 
-Severity: Critical
+Severity: High
 
-Description: Backend Service is experience significant degradation with a higher than usual response time. We observed a response time up to 391ms, when average response times are in the 35ms range.
-Please investigate root cause
+Description: `UnboundLocalError` local variable `output` referenced before assignment in add star method
 
-![incident.png](./answer-img/Incident.png)
+![backendtrace.png](./answer-img/backendtrace.png)
 
 
 ## Creating SLIs and SLOs
@@ -100,7 +100,7 @@ Name four SLIs that you would use to measure the success of this SLO.
 | Category     |                        SLI                        |                 SLO                  |
 |--------------|:-------------------------------------------------:|:------------------------------------:|
 | Throughput   | Average Response time for all successful requests | Average Response Time is under 2.5ms |
-| Availability |         Percentage of successful requests         |                 99%                  |
+| Availability |           All Pods are in running state           |       Uptime for BE Pod = > 1        |
 | Error Rate   |       % of Requests with errors per minute        |   Error Rate per hour is under 20%   |
 | Saturation   |  CPU usage or memory usage are in healthy levels  |    Memory usage is below 200 MiB     |
 
